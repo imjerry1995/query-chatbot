@@ -1,33 +1,34 @@
 const {chain} = require('bottender');
+const {
+  router,
+  line
+} = require('bottender/router');
 
 
 //data
 statistic_list = ['完整報表','全部人數','男女生','年齡','教育程度','月收入','職業別']
+specific_list = ['沉默成本','滿意度', '反向題']
 
 const RuleBased = (context, props) => {
-  return router([
-    line.message(HandleMessage),
-    line.follow(HandleFollow),
-    line.unfollow(HandleUnfollow),
-  ]);
-  //RuleBased design for button event
-  //context.event.text === 'hi' && context.sendText(props) || context.sendText('falljgfhjkd')
-  if(context.event.isFollow)
-  if(!context.event.isText){
-
+  if (context.event.isFollow) {
+    HandleFollow(context)
   }
-  return props.next; //jump to next chain
+  if(context.event.isText){
+    if (context.event.text === 'follow'){
+      HandleFollow(context)
+    }
+    HandleMessage(context)
+  }
 }
 
 async function HandleFollow(context) {
-  let welcome_msg = `
-  Hi, 歡迎來到問卷小幫手 ${String.fromCodePoint(0x10008A)}
+  let welcome_msg = `Hi, 歡迎來到問卷小幫手 ${String.fromCodePoint(0x10008A)}
   您可以輸入文字來對您的問卷做查詢
   如：幫我查目前問卷的總人數
   `
   let hint_text = `或者點按列出全部按鈕看可以列出什麼資訊👇`
   await context.sendText(welcome_msg)
-  await context.sendText('this is a hint area flex',{
+  await context.sendFlex('this is a hint area flex', {
     type: 'bubble',
     body: {
       type: 'box',
@@ -55,8 +56,8 @@ async function HandleFollow(context) {
 
 //這裡處理接過來的訊息
 async function HandleMessage(context,props){
-  context.event.text === 'menu' && showMenu(context)
-  context.event.text === '描述性統計' && showQuickReply(context)
+  context.event.text === '列出可以查看的功能' && showMenu(context)
+  context.event.text === '描述性統計' || context.event.text === '特定題目' && showQuickReply(context, context.event.text)
 }
 
 async function showMenu(context){
@@ -88,11 +89,27 @@ async function showMenu(context){
   await context.sendCarouselTemplate(altText, menu);
 }
 
-async function showQuickReply(context){
-  const quickReply_statistic = makeQuickReply(statistic_list)
-  await context.sendText('hello', {
-    quickReply_statistic
-  });
+async function showQuickReply(context,text){
+  let quickReply = {};
+  switch (text) {
+    case '描述性統計':
+      quickReply = {...makeQuickReply(statistic_list)}
+      await context.send([{
+        type: 'text',
+        text: '要顯示什麼呢',
+        quickReply,
+      }, ]);
+      break;
+    case '特定題目':
+      quickReply = {...makeQuickReply(specific_list)}
+      await context.send([{
+        type: 'text',
+        text: '要顯示什麼呢',
+        quickReply,
+      }, ]);
+      break;
+    default:
+  }
 }
 
 const makeQuickReply = list =>{
@@ -119,5 +136,7 @@ module.exports = async function App(context) {
   return chain([
     RuleBased
   ]);
+  //context.event.text === '訂閱' && await context.sendText('訂閱') || await context.sendText('falljgfhjkd')
+
 };
 
