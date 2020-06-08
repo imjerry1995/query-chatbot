@@ -34,6 +34,7 @@ const RuleBased = (context, props) => {
   }
 }
 
+/**handle functions start*/
 async function HandleFollow(context) {
   let welcome_msg = `Hi, 歡迎來到問卷小幫手 ${String.fromCodePoint(0x10008A)}
   您可以輸入文字來對您的問卷做查詢
@@ -74,6 +75,16 @@ async function HandleMessage(context,props){
   || context.event.text === '特定題目' && showSubMenu(context, context.event.text)
 }
 
+//處理 payload
+async function HandlePayload(context) {
+  //await context.sendText(`received the payload: ${context.event.payload}`);
+  const res = JSON.parse(context.event.payload)
+  res.quick && makeQuickReply(context, res.type, sub_list) //按鈕有PAYLOAD且需要快速回應
+    !res.quick && await context.sendText(res.type) //沒有快速回應的值接傳文字
+}
+/**handle functions end*/
+
+/**show Menus start*/
 async function showMenu(context){
   const menu = [
     {
@@ -122,15 +133,7 @@ async function showSubMenu(context,text) {
     await context.sendButtonTemplate(altText, subMenu);
   }
 }
-
-
-//處理 payload
-async function HandlePayload(context){
-  await context.sendText(`received the payload: ${context.event.payload}`);
-  const res = JSON.parse(context.event.payload)
-  res.quick && makeQuickReply(res.type, sub_list) //按鈕有PAYLOAD且需要快速回應
-  !res.quick && await context.sendText(res.type) //沒有快速回應的值接傳文字
-}
+/**show Menus end*/
 
 /**快速生成template function start */
 const makeButtonMenuActions = lists =>{
@@ -144,13 +147,14 @@ const makeButtonMenuActions = lists =>{
       quick: true,
       type: list
     }
+    if(list === '完整報表' || list === '全部人數' || list === '沉默成本' || list === '滿意度' || list === '反向題') data.quick = false
     item.data = JSON.stringify(data)
     actions.push(item)
   })
   return actions
 }
 
-const makeQuickReply = async(type, sub_list) => {
+const makeQuickReply = async (context,type, sub_list) => {
   const lists = sub_list[type]
   const quickReply = {
     items: []
