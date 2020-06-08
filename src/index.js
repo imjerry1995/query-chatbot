@@ -1,9 +1,5 @@
 const {chain} = require('bottender');
-const {
-  router,
-  line
-} = require('bottender/router');
-
+const dialogflow = require('@bottender/dialogflow');
 
 //data
 statistic_basic = ['完整報表','全部人數','男女生']
@@ -179,30 +175,34 @@ const makeQuickReply = async (context,type, sub_list) => {
 }
 /**快速生成template function end */
 
-const handleStatistc = res => {
-  res.all && queryAll()
-}
 
 /**綁 dialogFlow function start */
-async function queryAll(all='',count='',gender=''){
-  //call api直接包api
-  const total = 466
-  const total_girl = 234
-  const total_boy = total - total_girl
-  all === '完整報表' && showReport() 
-  || (all === '總數' || count!='' || (all==='所有' && count!='')) && await context.send.text(`目前回收人數總共${total}人`)
-  || gender === '性別' && await context.send.text(`目前男生人數總共${total_boy}人
-                                                  目前女生人數總共${total_girl}人`)
-  || gender === '男生' && await context.send.text(`目前男生人數總共${total_boy}人`)
-  || gender === '女生' && await context.send.text(`目前女生人數總共${total_girl}人`)
+async function queryAll(context){
+  // //call api直接包api
+  // const total = 466
+  // const total_girl = 234
+  // const total_boy = total - total_girl
+  // all === '完整報表' && showReport() 
+  // || (all === '總數' || count!='' || (all==='所有' && count!='')) && await context.send.text(`目前回收人數總共${total}人`)
+  // || gender === '性別' && await context.send.text(`目前男生人數總共${total_boy}人
+  //                                                 目前女生人數總共${total_girl}人`)
+  // || gender === '男生' && await context.send.text(`目前男生人數總共${total_boy}人`)
+  // || gender === '女生' && await context.send.text(`目前女生人數總共${total_girl}人`)
+  await context.sendText('Hello!')
 }
 /**綁 dialogFlow function end */
 
+const Dialogflow = dialogflow({
+  projectId: process.env.GOOGLE_APPLICATION_PROJECT_ID,
+  actions: {
+    queryAll: queryAll,
+  },
+});
+
 module.exports = async function App(context) {
   return chain([
+    Dialogflow,
     RuleBased
   ]);
-  //context.event.text === '訂閱' && await context.sendText('訂閱') || await context.sendText('falljgfhjkd')
-
 };
 
