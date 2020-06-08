@@ -177,18 +177,21 @@ const makeQuickReply = async (context,type, sub_list) => {
 
 
 /**綁 dialogFlow function start */
-async function queryAll(context){
-  // //call api直接包api
-  // const total = 466
-  // const total_girl = 234
-  // const total_boy = total - total_girl
+async function queryAll(context,props){
+  console.log(props.parameters.fields.gender.listValue.values[0].stringValue)
+  const gender = props.parameters.fields.gender.listValue.values[0].stringValue
+  //call api直接包api
+  const total = 466
+  const total_girl = 234
+  const total_boy = total - total_girl
+  gender === '性別' && await context.sendText(`目前男生人數總共${total_boy}人\n目前女生人數總共${total_girl}人`)
   // all === '完整報表' && showReport() 
   // || (all === '總數' || count!='' || (all==='所有' && count!='')) && await context.send.text(`目前回收人數總共${total}人`)
   // || gender === '性別' && await context.send.text(`目前男生人數總共${total_boy}人
   //                                                 目前女生人數總共${total_girl}人`)
   // || gender === '男生' && await context.send.text(`目前男生人數總共${total_boy}人`)
   // || gender === '女生' && await context.send.text(`目前女生人數總共${total_girl}人`)
-  await context.sendText('Hello!')
+  //await context.sendText('Hello!')
 }
 /**綁 dialogFlow function end */
 
