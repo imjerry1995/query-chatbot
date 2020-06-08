@@ -1,5 +1,6 @@
 const {chain} = require('bottender');
 const dialogflow = require('@bottender/dialogflow');
+const fetch = require("node-fetch");
 
 //data
 statistic_basic = ['完整報表','全部人數','男女生']
@@ -237,16 +238,31 @@ const makeQuickReply = async (context,type, sub_list) => {
 //   }
 // }
 
+function fetchData(api){
+  fetch(process.env.API_URL + api)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (jsonData) {
+      let total = jsonData.data
+      console.log(total)
+      return total;
+    });
+}
+
 async function queryAll(context, props, text) {
   const param = props === undefined ? '' : props.parameters.fields
-  //console.log(param.gender.listValue.values.length)
   const all = param === '' ? text : param.all.stringValue
   const gender = param === '' ? '':(param.gender.listValue.values.length > 0 ? param.gender.listValue.values[0].stringValue : '')
   const count = param === '' ? text :param.count.stringValue
-  //call api直接包api
-  const total = 466
-  const total_girl = 234
-  const total_boy = total - total_girl
+
+  console.log(fetchData('all'))
+
+  var total = 466
+  let total_girl = 234
+  let total_boy = total - total_girl
+
+  total = fetchData('all')
 
   if (all === '完整報表') {
     await context.sendText(`會秀出完整報表`)
@@ -273,7 +289,7 @@ module.exports = async function App(context) {
   return chain([
     Dialogflow,
     RuleBased,
-    others
+    others,
   ]);
 };
 
