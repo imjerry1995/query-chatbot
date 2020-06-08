@@ -9,6 +9,13 @@ const {
 statistic_basic = ['完整報表','全部人數','男女生']
 statistic_advance = ['年齡', '教育程度', '月收入', '職業別']
 specific_list = ['沉默成本','滿意度', '反向題']
+sub_list = {
+  '男女生': ['男生','女生'],
+  '年齡': ['18歲以下', '18-30歲', '31-40歲', '41-50歲', '51-60歲', '60歲以上'],
+  '教育程度': ['國小或以下', '高中/高職', '專科', '大學', '碩士', '專業碩士', '博士'],
+  '月收入': ['20000元以下', '20000-39999元', '40000-59999元', '60000-79999元', '80000-99999元', '100000元以上'],
+  '職業別': ['學生', '軍公教', '服務業', '工商業', '自由業', '家管', '其他'],
+}
 
 
 const RuleBased = (context, props) => {
@@ -116,89 +123,55 @@ async function showSubMenu(context,text) {
   }
 }
 
-//改成子項
-async function showQuickReply(context,text){
-  let quickReply = {};
-  switch (text) {
-    case '描述性統計':
-      quickReply = {...makeQuickReply(statistic_list)}
-      await context.send([{
-        type: 'text',
-        text: '要顯示什麼呢',
-        quickReply,
-      }, ]);
-      break;
-    case '特定題目':
-      quickReply = {...makeQuickReply(specific_list)}
-      await context.send([{
-        type: 'text',
-        text: '要顯示什麼呢',
-        quickReply,
-      }, ]);
-      break;
-    default:
-  }
-}
 
 //處理 payload
 async function HandlePayload(context){
   await context.sendText(`received the payload: ${context.event.payload}`);
   const res = JSON.parse(context.event.payload)
-  //context.event.payload 直接接打api回收response做判斷
-  res.action === 'sta' && handleStatistc(res)
+  res.quick && makeQuickReply(res.type, sub_list) //按鈕有PAYLOAD且需要快速回應
+  !res.quick && await context.sendText(res.type) //沒有快速回應的值接傳文字
 }
 
 /**快速生成template function start */
-const makeButtonMenuActions = list =>{
+const makeButtonMenuActions = lists =>{
   const actions = []
-  for (let i = 0; i < list.length; i++) {
+  lists.map(list=>{
     const item = {
       type: 'postback',
-      label: list[i],
+      label: list,
     }
     const data = {
       quick: true,
-      type: list[i]
+      type: list
     }
     item.data = JSON.stringify(data)
     actions.push(item)
-  }
+  })
   return actions
 }
-const makeQuickReply = list =>{
+
+const makeQuickReply = async(type, sub_list) => {
+  const lists = sub_list[type]
   const quickReply = {
     items: []
   }
-  for(let i=0;i<list.length;i++){
+  lists.map(list => {
     const item = {
       type: 'action',
       action: {
-        type: 'postback',
-        label: list[i],
+        type: 'message',
+        label: list, //顯示按鈕的名稱
+        text: list, //視為使用者打字(所以可接到)
       }
     }
-    // if (list[i] === '完整報表' || list[i] === '全部人數'){
-    //   item.action.data = 'action=sta&all=true'
-    // } else if (list[i] === '沉默成本' || list[i] === '忠誠度' || list[i] === '反向題') {
-    //   item.action.data = 'action=item'
-    // }else{
-    //   item = {
-    //     ...item,
-    //     action: {
-    //       type: 'message',
-    //       label: '列出全部', //顯示按鈕的名稱
-    //       text: '列出可以查看的功能', //視為使用者打字(所以可接到)
-    //     }
-    //   }
-    //   // const data = {
-    //   //   action: 'sta',
-    //   //   type: list[i]
-    //   // }
-    //   //item.action.data = JSON.stringify(data)
-    // }
+    //快速回應(最後一層) 直接送文字接dialog
     quickReply.items.push(item)
-  }
-  return quickReply
+  })
+  await context.send([{
+    type: 'text',
+    text: '要顯示什麼呢',
+    quickReply,
+  }, ]);
 }
 /**快速生成template function end */
 
@@ -208,7 +181,7 @@ const handleStatistc = res => {
 
 /**綁 dialogFlow function start */
 async function queryAll(all='',count='',gender=''){
-  //call api
+  //call api直接包api
   const total = 466
   const total_girl = 234
   const total_boy = total - total_girl
