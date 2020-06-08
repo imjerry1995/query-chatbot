@@ -61,4 +61,6 @@ typings/
 
 # dotenv environment variables file
 .env
-.env.example
+.example
+
+dbquery-agent-xymoww-9bae5edaa9a5.json
