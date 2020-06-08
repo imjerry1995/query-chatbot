@@ -35,8 +35,9 @@ async function HandleFollow(context) {
   let welcome_msg = `Hi, 歡迎來到問卷小幫手 ${String.fromCodePoint(0x10008A)}
   您可以輸入文字來對您的問卷做查詢
   如：幫我查目前問卷的總人數
+  或是點選按鈕看可以列出什麼資訊👇
   `
-  let hint_text = `或者點按列出全部按鈕看可以列出什麼資訊👇`
+  let hint_text = `列出Menu👇`
   await context.sendText(welcome_msg)
   await context.sendFlex('this is a hint area flex', {
     type: 'bubble',
@@ -76,7 +77,42 @@ async function HandlePayload(context) {
   //await context.sendText(`received the payload: ${context.event.payload}`);
   const res = JSON.parse(context.event.payload)
   res.quick && makeQuickReply(context, res.type, sub_list) //按鈕有PAYLOAD且需要快速回應
-    !res.quick && await context.sendText(res.type) //沒有快速回應的值接傳文字
+  !res.quick && queryAll(context,undefined,res.type) //沒有快速回應的值接傳文字
+}
+
+async function others(context) {
+  let welcome_msg = `抱歉, 小幫手聽不懂 ${String.fromCodePoint(0x10009B)}
+  您可以...
+  輸入文字來對您的問卷做查詢
+  如：幫我查目前問卷的總人數
+  或是點選按鈕看可以列出什麼資訊👇
+  `
+  let hint_text = `列出Menu👇`
+  await context.sendText(welcome_msg)
+  await context.sendFlex('this is a hint area flex', {
+    type: 'bubble',
+    body: {
+      type: 'box',
+      layout: 'vertical',
+      contents: [{
+        type: 'text',
+        text: hint_text,
+      }]
+    },
+    footer: {
+      type: 'box',
+      layout: 'vertical',
+      contents: [{
+        type: 'button',
+        style: 'primary',
+        action: {
+          type: 'message',
+          label: '列出全部',//顯示按鈕的名稱
+          text: '列出可以查看的功能', //視為使用者打字(所以可接到)
+        },
+      }]
+    }
+  })
 }
 /**handle functions end*/
 
@@ -177,21 +213,52 @@ const makeQuickReply = async (context,type, sub_list) => {
 
 
 /**綁 dialogFlow function start */
-async function queryAll(context,props){
-  console.log(props.parameters.fields.gender.listValue.values[0].stringValue)
-  const gender = props.parameters.fields.gender.listValue.values[0].stringValue
+// async function queryAll(context,props){
+//   const param = props.parameters.fields
+//   //console.log(param.gender.listValue.values.length)
+//   const all = param.all.stringValue
+//   const gender = param.gender.listValue.values.length>0 ? param.gender.listValue.values[0].stringValue : ''
+//   const count = param.count.stringValue
+//   //call api直接包api
+//   const total = 466
+//   const total_girl = 234
+//   const total_boy = total - total_girl
+
+//   if (all === '完整報表'){
+//     await context.sendText(`會秀出完整報表`)
+//   }else if(all === '總數' || count!='' || (all==='所有' && count!='')){
+//     await context.sendText(`目前回收人數總共${total}人`)
+//   } else if (gender === '性別'){
+//     context.sendText(`目前男生人數總共${total_boy}人\n目前女生人數總共${total_girl}人`)
+//   } else if (gender === '男生'){
+//     await context.sendText(`目前男生人數總共${total_boy}人`)
+//   } else if (gender === '女生'){
+//     await context.sendText(`目前女生人數總共${total_girl}人`)
+//   }
+// }
+
+async function queryAll(context, props, text) {
+  const param = props === undefined ? '' : props.parameters.fields
+  //console.log(param.gender.listValue.values.length)
+  const all = param === '' ? text : param.all.stringValue
+  const gender = param === '' ? '':(param.gender.listValue.values.length > 0 ? param.gender.listValue.values[0].stringValue : '')
+  const count = param === '' ? text :param.count.stringValue
   //call api直接包api
   const total = 466
   const total_girl = 234
   const total_boy = total - total_girl
-  gender === '性別' && await context.sendText(`目前男生人數總共${total_boy}人\n目前女生人數總共${total_girl}人`)
-  // all === '完整報表' && showReport() 
-  // || (all === '總數' || count!='' || (all==='所有' && count!='')) && await context.send.text(`目前回收人數總共${total}人`)
-  // || gender === '性別' && await context.send.text(`目前男生人數總共${total_boy}人
-  //                                                 目前女生人數總共${total_girl}人`)
-  // || gender === '男生' && await context.send.text(`目前男生人數總共${total_boy}人`)
-  // || gender === '女生' && await context.send.text(`目前女生人數總共${total_girl}人`)
-  //await context.sendText('Hello!')
+
+  if (all === '完整報表') {
+    await context.sendText(`會秀出完整報表`)
+  } else if (gender === '性別') {
+    context.sendText(`目前男生人數總共${total_boy}人\n目前女生人數總共${total_girl}人`)
+  } else if (gender === '男生') {
+    await context.sendText(`目前男生人數總共${total_boy}人`)
+  } else if (gender === '女生' || (gender === '女生' && count != '')) {
+    await context.sendText(`目前女生人數總共${total_girl}人`)
+  } else if (all === '總數' || count != '' || (all === '所有' && count != '')) {
+    await context.sendText(`目前回收人數總共${total}人`)
+  }
 }
 /**綁 dialogFlow function end */
 
@@ -205,7 +272,8 @@ const Dialogflow = dialogflow({
 module.exports = async function App(context) {
   return chain([
     Dialogflow,
-    RuleBased
+    RuleBased,
+    others
   ]);
 };
 
