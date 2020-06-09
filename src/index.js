@@ -263,7 +263,22 @@ async function queryAll(context, props, text) {
     家管:${result.job['家管']}人\n
     其他:${result.job['其他']}人\n`)
 
-    //缺三題
+    await context.sendText(`沉默成本\n
+    sunk_1平均:${result.sunk['sunk_1']}分\n
+    sunk_2平均:${result.sunk['sunk_2']}分\n
+    sunk_3平均:${result.sunk['sunk_3']}分\n
+    sunk_4平均:${result.sunk['sunk_4']}分\n
+    sunk_5平均:${result.sunk['sunk_5']}分\n
+    ---------------\n
+    滿意度\n
+    satis_1平均:${result.satis['satis_1']}分\n
+    satis_2平均:${result.sunk['satis_2']}分\n
+    satis_3平均:${result.sunk['satis_3']}分\n
+    satis_4平均:${result.sunk['satis_4']}分\n
+    ---------------\n
+    反向題\n
+    目前有:${result.reverse}個人不符合資格\n
+    `)
 
   } else if (gender === '性別') {
     context.sendText(`目前男生人數總共${result.boy}}人\n目前女生人數總共${result.girl}人`)
