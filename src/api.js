@@ -43,10 +43,50 @@ const converse_r = q_list => {
 result_data.total = fetchData('all').data //總數
 result_data.boy = fetchData('all/m').data //男生
 result_data.girl = fetchData('all/f').data // 女生
-result_data.age = fetchData('age').data // 年齡(一包json)
-result_data.edu = fetchData('edu').data // 年齡(一包json)
-result_data.salary = fetchData('salary').data // 年齡(一包json)
-result_data.job = fetchData('job').data // 年齡(一包json)
+// result_data.age = fetchData('age').data // 年齡(一包json)
+// result_data.edu = fetchData('edu').data // 年齡(一包json)
+// result_data.salary = fetchData('salary').data // 年齡(一包json)
+// result_data.job = fetchData('job').data // 年齡(一包json)
+
+
+result_data.age = {
+  "18歲以下":0,
+  "18-30歲":1,
+  "31-40歲":2,
+  "41-50歲":3,
+  "51-60歲":2,
+  "60歲以上":2
+}
+
+result_data.edu = {
+  "國小或以下":1,
+  "高中/高職":2, 
+  "專科":1,
+  "大學":4,
+  "碩士":1,
+  "專業碩士":0,
+  "博士":1
+}
+
+result_data.salary = {
+  '20000元以下':1,
+  '20000-39999元':2,
+  '40000-59999元':2,
+  '60000-79999元':2,
+  '80000-99999元':2,
+  '100000元以上':1
+}
+
+result_data.job = {
+  '學生':1,
+  '軍公教':1,
+  '服務業':4,
+  '工商業':3,
+  '自由業':0,
+  '家管':1,
+  '其他':0
+}
+
 
 /**沉默成本 */
 result_data.sunk = {

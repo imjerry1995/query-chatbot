@@ -1,6 +1,5 @@
 const {chain} = require('bottender');
 const dialogflow = require('@bottender/dialogflow');
-const fetch = require("node-fetch");
 const result = require('./api.js'); //驗證有沒有接到
 
 //data
@@ -215,41 +214,6 @@ const makeQuickReply = async (context,type, sub_list) => {
 
 
 /**綁 dialogFlow function start */
-// async function queryAll(context,props){
-//   const param = props.parameters.fields
-//   //console.log(param.gender.listValue.values.length)
-//   const all = param.all.stringValue
-//   const gender = param.gender.listValue.values.length>0 ? param.gender.listValue.values[0].stringValue : ''
-//   const count = param.count.stringValue
-//   //call api直接包api
-//   const total = 466
-//   const total_girl = 234
-//   const total_boy = total - total_girl
-
-//   if (all === '完整報表'){
-//     await context.sendText(`會秀出完整報表`)
-//   }else if(all === '總數' || count!='' || (all==='所有' && count!='')){
-//     await context.sendText(`目前回收人數總共${total}人`)
-//   } else if (gender === '性別'){
-//     context.sendText(`目前男生人數總共${total_boy}人\n目前女生人數總共${total_girl}人`)
-//   } else if (gender === '男生'){
-//     await context.sendText(`目前男生人數總共${total_boy}人`)
-//   } else if (gender === '女生'){
-//     await context.sendText(`目前女生人數總共${total_girl}人`)
-//   }
-// }
-
-function fetchData(api){
-  fetch(process.env.API_URL + api)
-    .then(function (response) {
-      return response.json();
-    })
-    .then(function (jsonData) {
-      let total = jsonData.data
-      console.log(total)
-      return total;
-    });
-}
 
 async function queryAll(context, props, text) {
   const param = props === undefined ? '' : props.parameters.fields
@@ -259,8 +223,9 @@ async function queryAll(context, props, text) {
 
   console.log(result) //測試有沒有抓到
 
+  //測試chart.js
   if (all === '完整報表') {
-    await context.sendText(`會秀出完整報表`)
+    await context.sendText(`會秀出完整報表`) //測試
   } else if (gender === '性別') {
     context.sendText(`目前男生人數總共${result.boy}}人\n目前女生人數總共${result.girl}人`)
   } else if (gender === '男生') {
@@ -271,12 +236,140 @@ async function queryAll(context, props, text) {
     await context.sendText(`目前回收人數總共${result.total}人`)
   }
 }
+
+
+async function queryAge(context, props) {
+  const param = props.parameters.fields
+  const all =  param.all.stringValue
+  const ages = param.ages.listValue.values.length > 0 ? param.gender.listValue.values : ''
+  const count = param.count.stringValue
+
+  console.log(result) //測試有沒有抓到
+
+  //測試chart.js
+  if ((all != '' && ages === '年齡')|| ages === '年齡') {
+    await context.sendText(`18歲以下總共${result.age['18歲以下']}\n
+    18-30歲總共${result.age['18-30歲']}\n
+    31-40歲總共${result.age['31-40歲']}\n
+    41-50歲總共${result.age['41-50歲']}\n
+    60歲以上總共${result.age['60歲以上']}\n`)
+  } else if (ages.length>0) {
+    ages.map(el=>{
+      await context.sendText(`${el}總共${result.age[el]}人`)
+    })
+  }
+}
+
+async function queryEdu(context, props) {
+  const param = props.parameters.fields
+  const all = param.all.stringValue
+  const edu = param.edu.listValue.values.length > 0 ? param.gender.listValue.values : ''
+
+  console.log(result) //測試有沒有抓到
+
+  //測試chart.js
+  if ((all != '' && edu === '教育') || edu === '教育') {
+    await context.sendText(`國小或以下總共${result.edu['國小或以下']}\n
+    高中/高職總共${result.edu['高中/高職']}\n
+    專科總共${result.edu['專科']}\n
+    大學總共${result.edu['大學']}\n
+    碩士總共${result.edu['碩士']}\n
+    專業碩士總共${result.edu['專業碩士']}\n
+    博士總共${result.edu['博士']}\n`)
+  } else if (edu.length > 0) {
+    edu.map(el => {
+      await context.sendText(`${el}總共${result.edu[el]}人`)
+    })
+  }
+}
+
+async function querySalary(context, props) {
+  const param = props.parameters.fields
+  const all = param.all.stringValue
+  const salary = param.salary.listValue.values.length > 0 ? param.gender.listValue.values : ''
+
+  console.log(result) //測試有沒有抓到
+
+  //測試chart.js
+  if ((all != '' && salary === '薪水') || salary === '薪水') {
+    await context.sendText(`20000元以下總共${result.salary['20000元以下']}\n
+    20000-39999元總共${result.salary['20000-39999元']}\n
+    40000-59999元總共${result.salary['40000-59999元']}\n
+    60000-79999元總共${result.salary['60000-79999元']}\n
+    80000-99999元總共${result.salary['80000-99999元']}\n
+    100000元以上總共${result.salary['100000元以上']}\n`)
+  } else if (salary.length > 0) {
+    salary.map(el => {
+      await context.sendText(`${el}總共${result.salary[el]}人`)
+    })
+  }
+}
+
+
+async function queryJob(context, props) {
+  const param = props.parameters.fields
+  const all = param.all.stringValue
+  const job = param.job.listValue.values.length > 0 ? param.gender.listValue.values : ''
+  const count = param.count.stringValue
+
+  console.log(result) //測試有沒有抓到
+
+  //測試chart.js
+  if ((all != '' && job === '職業') || job === '職業') {
+    await context.sendText(`學生總共${result.job['學生']}\n
+    軍公教總共${result.job['軍公教']}\n
+    服務業總共${result.job['服務業']}\n
+    工商業總共${result.job['工商業']}\n
+    自由業總共${result.job['自由業']}\n
+    家管總共${result.job['家管']}\n
+    其他總共${result.job['其他']}\n`)
+  } else if (job.length > 0) {
+    job.map(el => {
+      await context.sendText(`${el}總共${result.job[el]}人`)
+    })
+  }
+}
+
+async function queryQuestion(context, props) {
+  const param = props.parameters.fields
+  const all = param.all.stringValue
+  const item = param.item.listValue.values.length > 0 ? param.gender.listValue.values : ''
+  const count = param.count.stringValue
+
+  console.log(result) //測試有沒有抓到
+
+  if (item.length > 0 && item!=='反向題'){
+    item.map(el => {
+      if(el === '沉默成本'){
+        await context.sendText(`sunk_1平均:${result.sunk['sunk_1']}分\n
+        sunk_2平均:${result.sunk['sunk_2']}分\n
+        sunk_3平均:${result.sunk['sunk_3']}分\n
+        sunk_4平均:${result.sunk['sunk_4']}分\n
+        sunk_5平均:${result.sunk['sunk_5']}分`)
+      }else{
+        await context.sendText(`satis_1平均:${result.satis['satis_1']}分\n
+        satis_2平均:${result.sunk['satis_2']}分\n
+        satis_3平均:${result.sunk['satis_3']}分\n
+        satis_4平均:${result.sunk['satis_4']}分`)
+      }
+    })
+  }else if(item==='反向題'){
+    await context.sendText(`反向題共有${result.reverse}人填錯，不符合資格`)
+  }
+}
+
+
 /**綁 dialogFlow function end */
 
 const Dialogflow = dialogflow({
   projectId: process.env.GOOGLE_APPLICATION_PROJECT_ID,
   actions: {
     queryAll: queryAll,
+    queryAge: queryAge,
+    queryEdu: queryEdu,
+    querySalary: querySalary,
+    queryJob: queryJob,
+    queryQuestion: queryQuestion
   },
 });
 
