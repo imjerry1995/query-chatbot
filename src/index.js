@@ -225,7 +225,46 @@ async function queryAll(context, props, text) {
 
   //測試chart.js
   if (all === '完整報表') {
-    await context.sendText(`會秀出完整報表`) //測試
+    await context.sendText(`性別人數\n
+    男生:${result.boy}人\n
+    女生:${result.girl}人\n
+    總人數:${result.total}人\n
+    ---------------\n
+    年齡分布\n
+    18歲以下:${result.age['18歲以下']}人\n
+    18-30歲:${result.age['18-30歲']}人\n
+    31-40歲:${result.age['31-40歲']}人\n
+    41-50歲:${result.age['41-50歲']}人\n
+    60歲以上:${result.age['60歲以上']}人\n
+    ---------------\n
+    教育程度\n
+    國小或以下:${result.edu['國小或以下']}人\n
+    高中/高職:${result.edu['高中/高職']}人\n
+    專科:${result.edu['專科']}人\n
+    大學:${result.edu['大學']}人\n
+    碩士:${result.edu['碩士']}人\n
+    專業碩士:${result.edu['專業碩士']}人\n
+    博士:${result.edu['博士']}人\n
+    ---------------\n
+    平均月收入\n
+    20000元以下:${result.salary['20000元以下']}人\n
+    20000-39999元:${result.salary['20000-39999元']}人\n
+    40000-59999元:${result.salary['40000-59999元']}人\n
+    60000-79999元:${result.salary['60000-79999元']}人\n
+    80000-99999元:${result.salary['80000-99999元']}人\n
+    100000元以上:${result.salary['100000元以上']}人\n
+    ---------------\n
+    職業別\n
+    學生:${result.job['學生']}人\n
+    軍公教:${result.job['軍公教']}人\n
+    服務業:${result.job['服務業']}人\n
+    工商業:${result.job['工商業']}人\n
+    自由業:${result.job['自由業']}人\n
+    家管:${result.job['家管']}人\n
+    其他:${result.job['其他']}人\n`)
+
+    //缺三題
+
   } else if (gender === '性別') {
     context.sendText(`目前男生人數總共${result.boy}}人\n目前女生人數總共${result.girl}人`)
   } else if (gender === '男生') {
