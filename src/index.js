@@ -1,6 +1,7 @@
 const {chain} = require('bottender');
 const dialogflow = require('@bottender/dialogflow');
 const fetch = require("node-fetch");
+const result = require('./api.js'); //驗證有沒有接到
 
 //data
 statistic_basic = ['完整報表','全部人數','男女生']
@@ -256,24 +257,18 @@ async function queryAll(context, props, text) {
   const gender = param === '' ? '':(param.gender.listValue.values.length > 0 ? param.gender.listValue.values[0].stringValue : '')
   const count = param === '' ? text :param.count.stringValue
 
-  console.log(fetchData('all'))
-
-  var total = 466
-  let total_girl = 234
-  let total_boy = total - total_girl
-
-  total = fetchData('all')
+  console.log(result) //測試有沒有抓到
 
   if (all === '完整報表') {
     await context.sendText(`會秀出完整報表`)
   } else if (gender === '性別') {
-    context.sendText(`目前男生人數總共${total_boy}人\n目前女生人數總共${total_girl}人`)
+    context.sendText(`目前男生人數總共${result.boy}}人\n目前女生人數總共${result.girl}人`)
   } else if (gender === '男生') {
-    await context.sendText(`目前男生人數總共${total_boy}人`)
+    await context.sendText(`目前男生人數總共${result.boy}人`)
   } else if (gender === '女生' || (gender === '女生' && count != '')) {
-    await context.sendText(`目前女生人數總共${total_girl}人`)
+    await context.sendText(`目前女生人數總共${result.total}人`)
   } else if (all === '總數' || count != '' || (all === '所有' && count != '')) {
-    await context.sendText(`目前回收人數總共${total}人`)
+    await context.sendText(`目前回收人數總共${result.total}人`)
   }
 }
 /**綁 dialogFlow function end */
