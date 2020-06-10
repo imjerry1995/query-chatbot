@@ -2,3 +2,6 @@ node_modules
 dist
 index.js
 test.js
+api.js
+test2.js
+data.js

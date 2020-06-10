@@ -1,6 +1,8 @@
 const {chain} = require('bottender');
 const dialogflow = require('@bottender/dialogflow');
-const result = require('./api.js'); //驗證有沒有接到
+const result = require('./data.js'); //驗證有沒有接到
+
+
 
 //data
 statistic_basic = ['完整報表','全部人數','男女生']
@@ -70,7 +72,7 @@ async function HandleFollow(context) {
 async function HandleMessage(context,props){
   context.event.text === '列出可以查看的功能' && showMenu(context)
   context.event.text === '描述性統計' && showSubMenu(context, context.event.text)
-  || context.event.text === '特定題目' && showSubMenu(context, context.event.text)
+  context.event.text === '特定題' && showSubMenu(context, context.event.text)
 }
 
 //處理 payload
@@ -78,7 +80,11 @@ async function HandlePayload(context) {
   //await context.sendText(`received the payload: ${context.event.payload}`);
   const res = JSON.parse(context.event.payload)
   res.quick && makeQuickReply(context, res.type, sub_list) //按鈕有PAYLOAD且需要快速回應
-  !res.quick && queryAll(context,undefined,res.type) //沒有快速回應的值接傳文字
+  if (!res.quick && res.type == '沉默成本' || !res.quick && res.type == '滿意度' || !res.quick && res.type == '反向題'){
+    queryQuestion(context, undefined, res.type)
+  } else if (!res.quick) {
+    queryAll(context, undefined, res.type) //沒有快速回應的值接傳文字
+  }
 }
 
 async function others(context) {
@@ -137,8 +143,8 @@ async function showMenu(context){
       actions: [
         {
           type: 'message',
-          label: '特定題目',
-          text: '特定題目'
+          label: '特定題',
+          text: '特定題'
         }
       ]
     }
@@ -161,7 +167,7 @@ async function showSubMenu(context,text) {
     subMenu2.actions = makeButtonMenuActions(statistic_advance)
     await context.sendButtonTemplate(altText, subMenu);
     await context.sendButtonTemplate(altText, subMenu2);
-  }else{
+  } else if (text === '特定題') {
     subMenu.actions = makeButtonMenuActions(specific_list)
     await context.sendButtonTemplate(altText, subMenu);
   }
@@ -220,8 +226,7 @@ async function queryAll(context, props, text) {
   const all = param === '' ? text : param.all.stringValue
   const gender = param === '' ? '':(param.gender.listValue.values.length > 0 ? param.gender.listValue.values[0].stringValue : '')
   const count = param === '' ? text :param.count.stringValue
-
-  console.log(result) //測試有沒有抓到
+ //測試有沒有抓到
 
   //測試chart.js
   if (all === '完整報表') {
@@ -272,9 +277,9 @@ async function queryAll(context, props, text) {
     ---------------\n
     滿意度\n
     satis_1平均:${result.satis['satis_1']}分\n
-    satis_2平均:${result.sunk['satis_2']}分\n
-    satis_3平均:${result.sunk['satis_3']}分\n
-    satis_4平均:${result.sunk['satis_4']}分\n
+    satis_2平均:${result.satis['satis_2']}分\n
+    satis_3平均:${result.satis['satis_3']}分\n
+    satis_4平均:${result.satis['satis_4']}分\n
     ---------------\n
     反向題\n
     目前有:${result.reverse}個人不符合資格\n
@@ -295,10 +300,9 @@ async function queryAll(context, props, text) {
 async function queryAge(context, props) {
   const param = props.parameters.fields
   const all =  param.all.stringValue
-  const ages = param.ages.listValue.values.length > 0 ? param.gender.listValue.values : ''
+  const ages = param.ages.listValue.values.length > 0 ? param.ages.listValue.values : ''
   const count = param.count.stringValue
-
-  console.log(result) //測試有沒有抓到
+ //測試有沒有抓到
 
   //測試chart.js
   if ((all != '' && ages === '年齡')|| ages === '年齡') {
@@ -308,8 +312,8 @@ async function queryAge(context, props) {
     41-50歲總共${result.age['41-50歲']}\n
     60歲以上總共${result.age['60歲以上']}\n`)
   } else if (ages.length>0) {
-    ages.map(el=>{
-      await context.sendText(`${el}總共${result.age[el]}人`)
+    ages.map(async (el) =>{
+      await context.sendText(`${el.stringValue}總共${result.age[el.stringValue]}人`)
     })
   }
 }
@@ -317,9 +321,8 @@ async function queryAge(context, props) {
 async function queryEdu(context, props) {
   const param = props.parameters.fields
   const all = param.all.stringValue
-  const edu = param.edu.listValue.values.length > 0 ? param.gender.listValue.values : ''
-
-  console.log(result) //測試有沒有抓到
+  const edu = param.edu.listValue.values.length > 0 ? param.edu.listValue.values : ''
+ //測試有沒有抓到
 
   //測試chart.js
   if ((all != '' && edu === '教育') || edu === '教育') {
@@ -331,8 +334,8 @@ async function queryEdu(context, props) {
     專業碩士總共${result.edu['專業碩士']}\n
     博士總共${result.edu['博士']}\n`)
   } else if (edu.length > 0) {
-    edu.map(el => {
-      await context.sendText(`${el}總共${result.edu[el]}人`)
+    edu.map(async (el) => {
+      await context.sendText(`${el.stringValue}總共${result.edu[el.stringValue]}人`)
     })
   }
 }
@@ -340,9 +343,8 @@ async function queryEdu(context, props) {
 async function querySalary(context, props) {
   const param = props.parameters.fields
   const all = param.all.stringValue
-  const salary = param.salary.listValue.values.length > 0 ? param.gender.listValue.values : ''
-
-  console.log(result) //測試有沒有抓到
+  const salary = param.salary.listValue.values.length > 0 ? param.salary.listValue.values : ''
+ //測試有沒有抓到
 
   //測試chart.js
   if ((all != '' && salary === '薪水') || salary === '薪水') {
@@ -353,8 +355,8 @@ async function querySalary(context, props) {
     80000-99999元總共${result.salary['80000-99999元']}\n
     100000元以上總共${result.salary['100000元以上']}\n`)
   } else if (salary.length > 0) {
-    salary.map(el => {
-      await context.sendText(`${el}總共${result.salary[el]}人`)
+    salary.map(async (el) => {
+      await context.sendText(`${el.stringValue}總共${result.salary[el.stringValue]}人`)
     })
   }
 }
@@ -363,10 +365,9 @@ async function querySalary(context, props) {
 async function queryJob(context, props) {
   const param = props.parameters.fields
   const all = param.all.stringValue
-  const job = param.job.listValue.values.length > 0 ? param.gender.listValue.values : ''
+  const job = param.job.listValue.values.length > 0 ? param.job.listValue.values : ''
   const count = param.count.stringValue
-
-  console.log(result) //測試有沒有抓到
+ //測試有沒有抓到
 
   //測試chart.js
   if ((all != '' && job === '職業') || job === '職業') {
@@ -378,35 +379,44 @@ async function queryJob(context, props) {
     家管總共${result.job['家管']}\n
     其他總共${result.job['其他']}\n`)
   } else if (job.length > 0) {
-    job.map(el => {
-      await context.sendText(`${el}總共${result.job[el]}人`)
+    job.map(async (el) => {
+      await context.sendText(`${el.stringValue}總共${result.job[el.stringValue]}人`)
     })
   }
 }
 
-async function queryQuestion(context, props) {
-  const param = props.parameters.fields
-  const all = param.all.stringValue
-  const item = param.item.listValue.values.length > 0 ? param.gender.listValue.values : ''
-  const count = param.count.stringValue
+async function queryQuestion(context, props, text) {
+  //console.log(props)
 
-  console.log(result) //測試有沒有抓到
+  // const all = param.all
+  // const item = param.item.listValue.values.length > 0 ? param.item.listValue.values : ''
+  // const count = param.count.stringValue
 
-  if (item.length > 0 && item!=='反向題'){
-    item.map(el => {
-      if(el === '沉默成本'){
+  const param = props === undefined ? '' : props.parameters.fields
+  console.log(param)
+
+  const item = param === '' ? [{stringValue: text}] : (param.item.listValue.values.length > 0 ? param.item.listValue.values : '')
+  
+
+   console.log(item) //測試有沒有抓到
+
+  if (item.length > 0){
+    item.map(async el => {
+      if(el.stringValue === '沉默成本'){
         await context.sendText(`sunk_1平均:${result.sunk['sunk_1']}分\n
         sunk_2平均:${result.sunk['sunk_2']}分\n
         sunk_3平均:${result.sunk['sunk_3']}分\n
         sunk_4平均:${result.sunk['sunk_4']}分\n
         sunk_5平均:${result.sunk['sunk_5']}分`)
-      }else{
+      } else if (el.stringValue === '滿意度') {
         await context.sendText(`satis_1平均:${result.satis['satis_1']}分\n
-        satis_2平均:${result.sunk['satis_2']}分\n
-        satis_3平均:${result.sunk['satis_3']}分\n
-        satis_4平均:${result.sunk['satis_4']}分`)
+        satis_2平均:${result.satis['satis_2']}分\n
+        satis_3平均:${result.satis['satis_3']}分\n
+        satis_4平均:${result.satis['satis_4']}分`)
+      } else if (el.stringValue === '反向題') {
+        await context.sendText(`反向題共有${result.reverse}人填錯，不符合資格`)
       }
-    })
+    }) 
   }else if(item==='反向題'){
     await context.sendText(`反向題共有${result.reverse}人填錯，不符合資格`)
   }
